@@ -90,17 +90,11 @@ clearAllButton.addEventListener("click", () => {
     saveToLocalStorage();
     renderTable();
 });
-
 exportPdfButton.addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
 
     const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisaje
     const date = new Date().toLocaleDateString();
-
-    // Definindo as variáveis do título e data
-    const title = "STOCK";
-    const dateText = `Fecha: ${date}`;
-    const kioscoText = "KIOSCO 365";
 
     // Definindo os cabeçalhos das colunas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
@@ -110,24 +104,11 @@ exportPdfButton.addEventListener("click", () => {
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
     const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizando a tabela
 
-    let y = 50; // Posição inicial para a tabela (depois do título)
-    let firstPage = true; // Flag para saber se estamos na primeira página
-
-    // Função para adicionar o título na primeira página
-    function addTitle() {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        const titleWidth = doc.getTextWidth(title);
-        doc.text(title, (doc.internal.pageSize.width - titleWidth) / 2, 20); // Título centralizado
-
-        doc.setFontSize(12);
-        const dateWidth = doc.getTextWidth(dateText);
-        doc.text(dateText, (doc.internal.pageSize.width - dateWidth) / 2, 30); // Data centralizada
-
-        doc.setFontSize(14);
-        const kioscoWidth = doc.getTextWidth(kioscoText);
-        doc.text(kioscoText, (doc.internal.pageSize.width - kioscoWidth) / 2, 40); // KIOSCO 365 centralizado
-    }
+    let y = 20; // Posição inicial para a tabela
+    const pageHeight = doc.internal.pageSize.height; // Altura da página
+    const tableHeight = pageHeight - 40; // Definindo a altura máxima da tabela (evitando que ultrapasse a página)
+    const rowHeight = 10; // Altura constante das linhas
+    const marginBottom = 10; // Margem inferior
 
     // Adicionando os cabeçalhos das colunas
     doc.setFont("helvetica", "bold");
@@ -141,8 +122,6 @@ exportPdfButton.addEventListener("click", () => {
 
     // Adicionando os dados da tabela
     doc.setFont("helvetica", "normal");
-    const rowHeight = 10; // Altura constante das linhas
-    const pageHeight = doc.internal.pageSize.height; // Altura da página
 
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
@@ -156,15 +135,13 @@ exportPdfButton.addEventListener("click", () => {
 
         startX = tableStartX; // Reiniciar a posição X para as colunas
 
-        // Verificar se a próxima linha ultrapassaria o limite da página
-        if (y + rowHeight > pageHeight - 10) {
+        // Verificar se a próxima linha ultrapassaria o limite da tabela
+        if (y + rowHeight > tableHeight - marginBottom) {
             doc.addPage(); // Adiciona uma nova página
             y = 20; // Reiniciar a posição Y após a nova página
-            if (firstPage) {
-                addTitle(); // Adiciona o título apenas na primeira página
-                firstPage = false; // Desativa a adição do título nas próximas páginas
-            }
-            doc.setFont("helvetica", "bold"); // Redesenha os cabeçalhos na nova página
+
+            // Adiciona os cabeçalhos novamente na nova página
+            doc.setFont("helvetica", "bold");
             startX = tableStartX;
             headers.forEach((header, i) => {
                 doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
@@ -199,6 +176,5 @@ exportPdfButton.addEventListener("click", () => {
     // Salvar o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
-
 
 document.addEventListener("DOMContentLoaded", renderTable);
