@@ -97,36 +97,39 @@ exportPdfButton.addEventListener("click", () => {
     const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisaje
     const date = new Date().toLocaleDateString();
 
-    // Título "STOCK" centrado
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
+    // Definindo as variáveis do título e data
     const title = "STOCK";
-    const titleWidth = doc.getTextWidth(title);
-    doc.text(title, (doc.internal.pageSize.width - titleWidth) / 2, 20); // Título centrado
-
-    // Fecha centrada
-    doc.setFontSize(12);
     const dateText = `Fecha: ${date}`;
-    const dateWidth = doc.getTextWidth(dateText);
-    doc.text(dateText, (doc.internal.pageSize.width - dateWidth) / 2, 30); // Fecha centrada
-
-    // "KIOSCO 365" centrado
-    doc.setFontSize(14);
     const kioscoText = "KIOSCO 365";
-    const kioscoWidth = doc.getTextWidth(kioscoText);
-    doc.text(kioscoText, (doc.internal.pageSize.width - kioscoWidth) / 2, 40); // KIOSCO 365 centrado
 
-    // Definiendo los encabezados de las columnas
+    // Definindo os cabeçalhos das colunas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
-    const columnWidths = [40, 30, 30, 30, 30, 50]; // Ancho de las columnas
+    const columnWidths = [40, 30, 30, 30, 30, 50]; // Largura das colunas
 
-    // Calculando el ancho total de la tabla
+    // Calculando a largura total da tabela
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centrar la tabla
+    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizando a tabela
 
     let y = 50; // Posição inicial para a tabela (depois do título)
+    let firstPage = true; // Flag para saber se estamos na primeira página
 
-    // Desenhando o cabeçalho da tabela
+    // Função para adicionar o título na primeira página
+    function addTitle() {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        const titleWidth = doc.getTextWidth(title);
+        doc.text(title, (doc.internal.pageSize.width - titleWidth) / 2, 20); // Título centralizado
+
+        doc.setFontSize(12);
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, (doc.internal.pageSize.width - dateWidth) / 2, 30); // Data centralizada
+
+        doc.setFontSize(14);
+        const kioscoWidth = doc.getTextWidth(kioscoText);
+        doc.text(kioscoText, (doc.internal.pageSize.width - kioscoWidth) / 2, 40); // KIOSCO 365 centralizado
+    }
+
+    // Adicionando os cabeçalhos das colunas
     doc.setFont("helvetica", "bold");
     let startX = tableStartX;
     headers.forEach((header, i) => {
@@ -157,6 +160,10 @@ exportPdfButton.addEventListener("click", () => {
         if (y + rowHeight > pageHeight - 10) {
             doc.addPage(); // Adiciona uma nova página
             y = 20; // Reiniciar a posição Y após a nova página
+            if (firstPage) {
+                addTitle(); // Adiciona o título apenas na primeira página
+                firstPage = false; // Desativa a adição do título nas próximas páginas
+            }
             doc.setFont("helvetica", "bold"); // Redesenha os cabeçalhos na nova página
             startX = tableStartX;
             headers.forEach((header, i) => {
@@ -192,5 +199,6 @@ exportPdfButton.addEventListener("click", () => {
     // Salvar o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
+
 
 document.addEventListener("DOMContentLoaded", renderTable);
