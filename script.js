@@ -94,7 +94,7 @@ clearAllButton.addEventListener("click", () => {
 exportPdfButton.addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
 
-    const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisaje
+    const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisagem
     const date = new Date().toLocaleDateString();
 
     // Título "STOCK" centrado
@@ -116,17 +116,17 @@ exportPdfButton.addEventListener("click", () => {
     const kioscoWidth = doc.getTextWidth(kioscoText);
     doc.text(kioscoText, (doc.internal.pageSize.width - kioscoWidth) / 2, 40); // KIOSCO 365 centrado
 
-    // Definiendo los encabezados de las columnas
+    // Definiendo os encabezados de las columnas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
     const columnWidths = [40, 30, 30, 30, 30, 50]; // Ancho de las columnas
 
-    // Calculando el ancho total de la tabla
+    // Calculando o total da largura das colunas
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centrar la tabla
+    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizar a tabela
 
-    let y = 50; // Posición inicial para la tabla (después del título)
+    let y = 50; // Posição inicial para a tabela (depois do título)
 
-    // Dibujando el encabezado de la tabla en una sola línea
+    // Desenhando o cabeçalho da tabela em uma linha
     doc.setFont("helvetica", "bold");
     let startX = tableStartX;
     headers.forEach((header, i) => {
@@ -134,24 +134,38 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[i];
     });
 
-    y += 15; // Aumentando el espacio entre el encabezado y la tabla (ahora 15)
+    y += 15; // Aumentando o espaço entre o cabeçalho e a tabela (agora 15)
 
-    // Agregando los datos de la tabla
+    // Agregando os dados da tabela
     doc.setFont("helvetica", "normal");
-    const rowHeight = 10; // Altura constante de las filas
+    const rowHeight = 10; // Altura constante das linhas
+
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
         const status = item.systemQty
             ? total < item.systemQty
-                ? `Falta ${item.systemQty - total} unidad(es)`
+                ? `Falta ${item.systemQty - total} unidade(s)`
                 : total > item.systemQty
-                ? `Sobra ${total - item.systemQty} unidad(es)`
+                ? `Sobra ${total - item.systemQty} unidade(s)`
                 : "OK"
             : "";
 
-        startX = tableStartX; // Reinicia la posición X para las columnas
+        startX = tableStartX; // Reinicia a posição X para as colunas
 
-        // Agregando los valores de las columnas
+        // Verificando se a linha ultrapassa o limite da página
+        if (y + rowHeight > doc.internal.pageSize.height) {
+            doc.addPage(); // Adiciona uma nova página
+            y = 20; // Reinicia a posição Y para a nova página
+            doc.setFont("helvetica", "bold");
+            startX = tableStartX;
+            headers.forEach((header, i) => {
+                doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
+                startX += columnWidths[i];
+            });
+            y += 15; // Aumenta o espaço após o cabeçalho
+        }
+
+        // Adicionando os valores das colunas
         doc.text(item.name, startX + columnWidths[0] / 2, y, null, null, "center");
         startX += columnWidths[0];
 
@@ -168,13 +182,10 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[4];
 
         doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
-        y += rowHeight; // Mantiene la altura constante entre las filas
+        y += rowHeight; // Mantém a altura constante entre as linhas
     });
 
-    // Asegurando que la última fila termine con la altura estándar
-    y = Math.round(y / rowHeight) * rowHeight;
-
-    // Guardar el PDF con el nombre formateado
+    // Salvando o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
 
