@@ -151,7 +151,7 @@ exportPdfButton.addEventListener("click", () => {
                 : "OK"
             : "";
 
-        startX = tableStartX; // Reinicia la posición X para las columnas
+        startX = tableStartX; // Reinicia a posição X para as colunas
 
         // Verificando se a próxima linha ultrapassaria o limite da página
         if (y + rowHeight > pageHeight - 10) {
@@ -183,7 +183,7 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[4];
 
         doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
-        y += rowHeight; // Mantiene la altura constante entre las filas
+        y += rowHeight; // Mantém a altura constante entre as linhas
     });
 
     // Asegurando que la última fila termine con la altura estándar
@@ -192,11 +192,5 @@ exportPdfButton.addEventListener("click", () => {
     // Guardar el PDF con el nombre formateado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
-
-
-    // Salvando o PDF com o nome formatado
-    doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
-});
-
 
 document.addEventListener("DOMContentLoaded", renderTable);
