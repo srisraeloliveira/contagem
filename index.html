@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control y Clasificación de Inventario</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Conteo de Inventario</h1>
+
+    <form id="itemForm">
+        <label for="itemName">Nombre del Producto:</label>
+        <input type="text" id="itemName" required>
+
+        <label for="exposedQty">Cantidad Expuesta:</label>
+        <input type="number" id="exposedQty" min="0" required>
+
+        <label for="depositQty">Cantidad en Depósito:</label>
+        <input type="number" id="depositQty" min="0" required>
+
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Expuesto</th>
+                <th>Depósito</th>
+                <th>Total</th>
+                <th>Sistema</th>
+                <th>Discrepancia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h2>Total General: <span id="totalGeral">0</span></h2>
+    <button id="clearAll">Limpiar Todos los Datos</button>
+    <button id="exportPdf">Exportar PDF</button>
+
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.message {
+    font-weight: bold;
+    padding: 5px;
+}
+
+.falta {
+    background-color: #e25d5d;
+    color: white;
+}
+
+.sobra {
+    background-color: #3a993a;
+    color: white;
+}
+
+.ok {
+    background-color: #e6ffe6;
+    color: black;
+}
+
+#exportPdf {
+    display: inline-block;
+    margin: 10px 0;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+#exportPdf:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    table, th, td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    th, td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
