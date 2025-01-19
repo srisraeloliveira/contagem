@@ -94,7 +94,7 @@ clearAllButton.addEventListener("click", () => {
 exportPdfButton.addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
 
-    const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisagem
+    const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisaje
     const date = new Date().toLocaleDateString();
 
     // Título "STOCK" centrado
@@ -116,17 +116,17 @@ exportPdfButton.addEventListener("click", () => {
     const kioscoWidth = doc.getTextWidth(kioscoText);
     doc.text(kioscoText, (doc.internal.pageSize.width - kioscoWidth) / 2, 40); // KIOSCO 365 centrado
 
-    // Definiendo os encabezados de las columnas
+    // Definiendo los encabezados de las columnas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
     const columnWidths = [40, 30, 30, 30, 30, 50]; // Ancho de las columnas
 
-    // Calculando o total da largura das colunas
+    // Calculando el ancho total de la tabla
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizar a tabela
+    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centrar la tabla
 
-    let y = 50; // Posição inicial para a tabela (depois do título)
+    let y = 50; // Posición inicial para la tabla (después del título)
 
-    // Desenhando o cabeçalho da tabela em uma linha
+    // Dibujando el encabezado de la tabla en una sola línea
     doc.setFont("helvetica", "bold");
     let startX = tableStartX;
     headers.forEach((header, i) => {
@@ -134,35 +134,36 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[i];
     });
 
-    y += 15; // Aumentando o espaço entre o cabeçalho e a tabela (agora 15)
+    y += 15; // Aumentando el espacio entre el encabezado y la tabla (ahora 15)
 
-    // Agregando os dados da tabela
+    // Agregando los datos de la tabla
     doc.setFont("helvetica", "normal");
-    const rowHeight = 10; // Altura constante das linhas
+    const rowHeight = 10; // Altura constante de las filas
+    const pageHeight = doc.internal.pageSize.height; // Altura de la página
 
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
         const status = item.systemQty
             ? total < item.systemQty
-                ? `Falta ${item.systemQty - total} unidade(s)`
+                ? `Falta ${item.systemQty - total} unidad(es)`
                 : total > item.systemQty
-                ? `Sobra ${total - item.systemQty} unidade(s)`
+                ? `Sobra ${total - item.systemQty} unidad(es)`
                 : "OK"
             : "";
 
-        startX = tableStartX; // Reinicia a posição X para as colunas
+        startX = tableStartX; // Reinicia la posición X para las columnas
 
-        // Verificando se a linha ultrapassa o limite da página
-        if (y + rowHeight > doc.internal.pageSize.height) {
+        // Verificando se a próxima linha ultrapassaria o limite da página
+        if (y + rowHeight > pageHeight - 10) {
             doc.addPage(); // Adiciona uma nova página
-            y = 20; // Reinicia a posição Y para a nova página
-            doc.setFont("helvetica", "bold");
+            y = 20; // Reinicia a posição Y após a nova página
+            doc.setFont("helvetica", "bold"); // Redesenha os cabeçalhos na nova página
             startX = tableStartX;
             headers.forEach((header, i) => {
                 doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
                 startX += columnWidths[i];
             });
-            y += 15; // Aumenta o espaço após o cabeçalho
+            y += 15; // Espaço entre o cabeçalho e os dados
         }
 
         // Adicionando os valores das colunas
@@ -182,8 +183,16 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[4];
 
         doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
-        y += rowHeight; // Mantém a altura constante entre as linhas
+        y += rowHeight; // Mantiene la altura constante entre las filas
     });
+
+    // Asegurando que la última fila termine con la altura estándar
+    y = Math.round(y / rowHeight) * rowHeight;
+
+    // Guardar el PDF con el nombre formateado
+    doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
+});
+
 
     // Salvando o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
