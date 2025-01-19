@@ -90,6 +90,7 @@ clearAllButton.addEventListener("click", () => {
     saveToLocalStorage();
     renderTable();
 });
+
 exportPdfButton.addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
 
@@ -98,17 +99,33 @@ exportPdfButton.addEventListener("click", () => {
 
     // Definindo os cabeçalhos das colunas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
-    const columnWidths = [40, 30, 30, 30, 30, 50]; // Largura das colunas
+    const rowHeight = 10; // Altura constante das linhas
+    const marginBottom = 10; // Margem inferior
+    const pageHeight = doc.internal.pageSize.height; // Altura da página
+
+    // Definir a largura da coluna "PRODUCTO" de forma flexível
+    const columnWidths = [];
+    let maxLengthProduct = 0;
+
+    // Calcular o comprimento máximo da primeira coluna
+    inventoryData.forEach(item => {
+        maxLengthProduct = Math.max(maxLengthProduct, item.name.length);
+    });
+
+    // Ajustar a largura da primeira coluna com base no comprimento do texto
+    const firstColumnWidth = maxLengthProduct * 1.5; // Fator de ajuste da largura
+    columnWidths.push(firstColumnWidth); // A largura da primeira coluna será flexível
+
+    // Definir larguras fixas para as outras colunas
+    const fixedColumnWidths = [30, 30, 30, 30, 50];
+    columnWidths.push(...fixedColumnWidths);
 
     // Calculando a largura total da tabela
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
     const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizando a tabela
 
     let y = 20; // Posição inicial para a tabela
-    const pageHeight = doc.internal.pageSize.height; // Altura da página
     const tableHeight = pageHeight - 40; // Definindo a altura máxima da tabela (evitando que ultrapasse a página)
-    const rowHeight = 10; // Altura constante das linhas
-    const marginBottom = 10; // Margem inferior
 
     // Adicionando os cabeçalhos das colunas
     doc.setFont("helvetica", "bold");
@@ -176,5 +193,6 @@ exportPdfButton.addEventListener("click", () => {
     // Salvar o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
+
 
 document.addEventListener("DOMContentLoaded", renderTable);
