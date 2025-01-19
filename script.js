@@ -124,9 +124,9 @@ exportPdfButton.addEventListener("click", () => {
     const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
     const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centrar la tabla
 
-    let y = 50; // Posición inicial para la tabla (después del título)
+    let y = 50; // Posição inicial para a tabela (depois do título)
 
-    // Dibujando el encabezado de la tabla en una sola línea
+    // Desenhando o cabeçalho da tabela
     doc.setFont("helvetica", "bold");
     let startX = tableStartX;
     headers.forEach((header, i) => {
@@ -134,36 +134,36 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[i];
     });
 
-    y += 15; // Aumentando el espacio entre el encabezado y la tabla (ahora 15)
+    y += 15; // Espaço entre o cabeçalho e as linhas de dados
 
-    // Agregando los datos de la tabla
+    // Adicionando os dados da tabela
     doc.setFont("helvetica", "normal");
-    const rowHeight = 10; // Altura constante de las filas
-    const pageHeight = doc.internal.pageSize.height; // Altura de la página
+    const rowHeight = 10; // Altura constante das linhas
+    const pageHeight = doc.internal.pageSize.height; // Altura da página
 
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
         const status = item.systemQty
             ? total < item.systemQty
-                ? `Falta ${item.systemQty - total} unidad(es)`
+                ? `Falta ${item.systemQty - total} unidade(s)`
                 : total > item.systemQty
-                ? `Sobra ${total - item.systemQty} unidad(es)`
+                ? `Sobra ${total - item.systemQty} unidade(s)`
                 : "OK"
             : "";
 
-        startX = tableStartX; // Reinicia a posição X para as colunas
+        startX = tableStartX; // Reiniciar a posição X para as colunas
 
-        // Verificando se a próxima linha ultrapassaria o limite da página
+        // Verificar se a próxima linha ultrapassaria o limite da página
         if (y + rowHeight > pageHeight - 10) {
             doc.addPage(); // Adiciona uma nova página
-            y = 20; // Reinicia a posição Y após a nova página
+            y = 20; // Reiniciar a posição Y após a nova página
             doc.setFont("helvetica", "bold"); // Redesenha os cabeçalhos na nova página
             startX = tableStartX;
             headers.forEach((header, i) => {
                 doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
                 startX += columnWidths[i];
             });
-            y += 15; // Espaço entre o cabeçalho e os dados
+            y += 15; // Espaço entre o cabeçalho e as linhas de dados
         }
 
         // Adicionando os valores das colunas
@@ -183,13 +183,13 @@ exportPdfButton.addEventListener("click", () => {
         startX += columnWidths[4];
 
         doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
-        y += rowHeight; // Mantém a altura constante entre as linhas
+        y += rowHeight; // Manter a altura constante entre as linhas
     });
 
-    // Asegurando que la última fila termine con la altura estándar
+    // Ajuste para garantir que a última linha seja impressa corretamente
     y = Math.round(y / rowHeight) * rowHeight;
 
-    // Guardar el PDF con el nombre formateado
+    // Salvar o PDF com o nome formatado
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
 
