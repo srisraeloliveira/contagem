@@ -58,3 +58,19 @@ th {
 #exportPdf:hover {
     background-color: #0056b3;
 }
+
+/* Ajustes para telas pequenas */
+@media (max-width: 768px) {
+    table, th, td {
+        font-size: 12px; /* Reduzindo a fonte */
+    }
+
+    th, td {
+        padding: 5px; /* Ajustando o espaçamento */
+    }
+
+    #exportPdf {
+        font-size: 14px; /* Ajustando o botão */
+        padding: 8px 15px;
+    }
+}
