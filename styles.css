@@ -58,16 +58,3 @@ th {
 #exportPdf:hover {
     background-color: #0056b3;
 }
-
-@media (max-width: 768px) {
-    table, th, td {
-        font-size: 12px;
-        padding: 8px;
-    }
-
-    th, td {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-}
