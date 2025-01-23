@@ -96,106 +96,82 @@ clearAllButton.addEventListener("click", () => {
 
 exportPdfButton.addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
-
-    const doc = new jsPDF({ orientation: 'landscape' }); // Modo paisaje
+    const doc = new jsPDF({ orientation: 'landscape' });
     const date = new Date().toLocaleDateString();
 
-    // Definindo os cabeçalhos das colunas
     const headers = ["PRODUCTO", "EXHIBIDO", "DEPÓSITO", "TOTAL", "SISTEMA", "ESTADO"];
-    const rowHeight = 10; // Altura constante das linhas
-    const marginBottom = 10; // Margem inferior
-    const pageHeight = doc.internal.pageSize.height; // Altura da página
+    const columnWidths = calculateColumnWidths();
+    const tableStartX = calculateTableStartX(columnWidths, doc);
+    const rowHeight = 10;
+    const pageHeight = doc.internal.pageSize.height;
+    let y = 20;
 
-    // Definir a largura da coluna "PRODUCTO" de forma flexível
-    const columnWidths = [];
-    let maxLengthProduct = 0;
+    // Adicionar cabeçalhos
+    const addHeaders = () => {
+        doc.setFont("helvetica", "bold");
+        addRowToPdf(doc, headers, columnWidths, tableStartX, y);
+        y += 15; // Espaço após os cabeçalhos
+    };
 
-    // Calcular o comprimento máximo da primeira coluna
-    inventoryData.forEach(item => {
-        maxLengthProduct = Math.max(maxLengthProduct, item.name.length);
-    });
+    // Início da tabela
+    addHeaders();
 
-    // Ajustar a largura da primeira coluna com base no comprimento do texto
-    const firstColumnWidth = maxLengthProduct * 1.5; // Fator de ajuste da largura
-    columnWidths.push(firstColumnWidth); // A largura da primeira coluna será flexível
-
-    // Definir larguras fixas para as outras colunas
-    const fixedColumnWidths = [30, 30, 30, 30, 50];
-    columnWidths.push(...fixedColumnWidths);
-
-    // Calculando a largura total da tabela
-    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-    const tableStartX = (doc.internal.pageSize.width - totalWidth) / 2; // Centralizando a tabela
-
-    let y = 20; // Posição inicial para a tabela
-    const tableHeight = pageHeight - 40; // Definindo a altura máxima da tabela (evitando que ultrapasse a página)
-
-    // Adicionando os cabeçalhos das colunas
-    doc.setFont("helvetica", "bold");
-    let startX = tableStartX;
-    headers.forEach((header, i) => {
-        doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
-        startX += columnWidths[i];
-    });
-
-    y += 15; // Espaço entre o cabeçalho e as linhas de dados
-
-    // Adicionando os dados da tabela
+    // Adicionar linhas de dados
     doc.setFont("helvetica", "normal");
-
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
-        const status = item.systemQty === 0 || item.systemQty
-            ? total < item.systemQty
-                ? `Falta ${item.systemQty - total} unidade(s)`
-                : total > item.systemQty
-                ? `Sobra ${total - item.systemQty} unidade(s)`
-                : "OK"
-            : "";
+        const status = calculateStatus(item.systemQty, total);
+        const row = [
+            item.name,
+            String(item.exposedQty),
+            String(item.depositQty),
+            String(total),
+            String(item.systemQty ?? ""),
+            status,
+        ];
 
-        startX = tableStartX; // Reiniciar a posição X para as colunas
-
-        // Verificar se a próxima linha ultrapassaria o limite da tabela
-        if (y + rowHeight > tableHeight - marginBottom) {
-            doc.addPage(); // Adiciona uma nova página
-            y = 20; // Reiniciar a posição Y após a nova página
-
-            // Adiciona os cabeçalhos novamente na nova página
-            doc.setFont("helvetica", "bold");
-            startX = tableStartX;
-            headers.forEach((header, i) => {
-                doc.text(header, startX + columnWidths[i] / 2, y, null, null, "center");
-                startX += columnWidths[i];
-            });
-            y += 15; // Espaço entre o cabeçalho e as linhas de dados
+        // Verificar se a linha cabe na página
+        if (y + rowHeight > pageHeight - 10) {
+            doc.addPage(); // Nova página
+            y = 20; // Reiniciar a posição Y
+            addHeaders(); // Repetir os cabeçalhos
         }
 
-        // Adicionando os valores das colunas
-        doc.text(item.name, startX + columnWidths[0] / 2, y, null, null, "center");
-        startX += columnWidths[0];
-
-        doc.text(String(item.exposedQty), startX + columnWidths[1] / 2, y, null, null, "center");
-        startX += columnWidths[1];
-
-        doc.text(String(item.depositQty), startX + columnWidths[2] / 2, y, null, null, "center");
-        startX += columnWidths[2];
-
-        doc.text(String(total), startX + columnWidths[3] / 2, y, null, null, "center");
-        startX += columnWidths[3];
-
-        doc.text(String(item.systemQty ?? ""), startX + columnWidths[4] / 2, y, null, null, "center");
-        startX += columnWidths[4];
-
-        doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
-        y += rowHeight; // Manter a altura constante entre as linhas
+        addRowToPdf(doc, row, columnWidths, tableStartX, y);
+        y += rowHeight; // Próxima linha
     });
 
-    // Ajuste para garantir que a última linha seja impressa corretamente
-    y = Math.round(y / rowHeight) * rowHeight;
-
-    // Salvar o PDF com o nome formatado
+    // Salvar o PDF
     doc.save(`Stock_${date.replace(/\//g, "-")}.pdf`);
 });
+
+/**
+ * Calcula larguras das colunas
+ */
+function calculateColumnWidths() {
+    const maxLengthProduct = Math.max(...inventoryData.map(item => item.name.length));
+    const firstColumnWidth = maxLengthProduct * 1.5;
+    return [firstColumnWidth, 30, 30, 30, 30, 50];
+}
+
+/**
+ * Calcula a posição inicial da tabela
+ */
+function calculateTableStartX(columnWidths, doc) {
+    const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
+    return (doc.internal.pageSize.width - totalWidth) / 2;
+}
+
+/**
+ * Adiciona uma linha ao PDF
+ */
+function addRowToPdf(doc, row, columnWidths, startX, y) {
+    let x = startX;
+    row.forEach((text, i) => {
+        doc.text(text, x + columnWidths[i] / 2, y, null, null, "center");
+        x += columnWidths[i];
+    });
+}
 
 
 document.addEventListener("DOMContentLoaded", renderTable);
