@@ -20,7 +20,7 @@ function renderTable() {
 
         const row = document.createElement("tr");
 
-        const status = item.systemQty
+        const status = item.systemQty === 0 || item.systemQty
             ? total < item.systemQty
                 ? `Falta ${item.systemQty - total} unidad(es)`
                 : total > item.systemQty
@@ -43,7 +43,7 @@ function renderTable() {
             <td><input type="number" value="${item.depositQty}" onchange="updateField(${index}, 'depositQty', this.value)" /></td>
             <td>${total}</td>
             <td>
-                <input type="number" value="${item.systemQty || ''}" onchange="updateField(${index}, 'systemQty', this.value)" />
+                <input type="number" value="${item.systemQty ?? ''}" onchange="updateField(${index}, 'systemQty', this.value)" />
             </td>
             <td class="${statusClass}">
                 ${status}
@@ -142,7 +142,7 @@ exportPdfButton.addEventListener("click", () => {
 
     inventoryData.forEach((item, index) => {
         const total = item.exposedQty + item.depositQty;
-        const status = item.systemQty
+        const status = item.systemQty === 0 || item.systemQty
             ? total < item.systemQty
                 ? `Falta ${item.systemQty - total} unidade(s)`
                 : total > item.systemQty
@@ -180,7 +180,7 @@ exportPdfButton.addEventListener("click", () => {
         doc.text(String(total), startX + columnWidths[3] / 2, y, null, null, "center");
         startX += columnWidths[3];
 
-        doc.text(String(item.systemQty || ""), startX + columnWidths[4] / 2, y, null, null, "center");
+        doc.text(String(item.systemQty ?? ""), startX + columnWidths[4] / 2, y, null, null, "center");
         startX += columnWidths[4];
 
         doc.text(status, startX + columnWidths[5] / 2, y, null, null, "center");
