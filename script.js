@@ -38,12 +38,12 @@ function renderTable() {
         }
 
         row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.exposedQty}</td>
-            <td>${item.depositQty}</td>
+            <td><input type="text" value="${item.name}" onchange="updateField(${index}, 'name', this.value)" /></td>
+            <td><input type="number" value="${item.exposedQty}" onchange="updateField(${index}, 'exposedQty', this.value)" /></td>
+            <td><input type="number" value="${item.depositQty}" onchange="updateField(${index}, 'depositQty', this.value)" /></td>
             <td>${total}</td>
             <td>
-                <input type="number" value="${item.systemQty || ''}" onchange="updateSystemQty(${index}, this.value)" />
+                <input type="number" value="${item.systemQty || ''}" onchange="updateField(${index}, 'systemQty', this.value)" />
             </td>
             <td class="${statusClass}">
                 ${status}
@@ -65,8 +65,8 @@ function deleteItem(index) {
     renderTable();
 }
 
-function updateSystemQty(index, value) {
-    inventoryData[index].systemQty = parseInt(value) || "";
+function updateField(index, field, value) {
+    inventoryData[index][field] = field === 'name' ? value : parseInt(value) || 0;
     saveToLocalStorage();
     renderTable();
 }
