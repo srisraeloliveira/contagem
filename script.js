@@ -83,6 +83,9 @@ itemForm.addEventListener("submit", (e) => {
     renderTable();
 
     itemForm.reset();
+
+    // Retornar o cursor ao campo "Nombre del Producto"
+    document.getElementById("itemName").focus();
 });
 
 clearAllButton.addEventListener("click", () => {
